@@ -22,7 +22,7 @@ class BottomBanner extends StatelessWidget {
     return Column(
       children: [
         Expanded(child: child),
-        enabled ? AdmobService.bannerBottom : const SizedBox.shrink(),
+        if (enabled) AdmobService.bannerBottom,
       ],
     );
   }

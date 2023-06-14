@@ -6,16 +6,16 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:single_radio/widgets/round_button.dart';
 import 'package:text_scroll/text_scroll.dart';
 import 'package:single_radio/config.dart';
 import 'package:single_radio/theme.dart';
 import 'package:single_radio/widgets/screen.dart';
-import 'package:single_radio/widgets/faded_box.dart';
-import 'package:single_radio/widgets/expanded_box.dart';
 import 'package:single_radio/screens/player/player_viewmodel.dart';
 
 class PlayerView extends StatefulWidget {
   const PlayerView({super.key});
+
   static const routeName = '/';
 
   @override
@@ -24,6 +24,7 @@ class PlayerView extends StatefulWidget {
 
 class _PlayerViewState extends State<PlayerView> {
   late final viewModel = Provider.of<PlayerViewModel>(context, listen: true);
+
   double get padding => MediaQuery.of(context).size.width * 0.08;
 
   @override
@@ -34,45 +35,71 @@ class _PlayerViewState extends State<PlayerView> {
       hideOverscrollIndicator: true,
       child: Column(
         children: [
-          const ExpandedBox(flex: 2, minHeight: 20),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
-            child: _Cover(
-              key: viewModel.artwork?.key,
-              size: MediaQuery.of(context).size.width - padding * 2,
-              image: viewModel.artwork ??
-                  Image.asset(
-                    'assets/images/cover.jpg',
-                    fit: BoxFit.cover,
-                  ),
+          const SizedBox(height: 20),
+          Expanded(
+            flex: 6,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              child: _Cover(
+                key: viewModel.artwork?.key,
+                size: MediaQuery.of(context).size.width - padding * 2,
+                image: viewModel.artwork ??
+                    Image.asset(
+                      'assets/images/cover.jpg',
+                      fit: BoxFit.cover,
+                    ),
+              ),
             ),
           ),
-          const ExpandedBox(flex: 4, minHeight: 40),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _Title(
-                artist: viewModel.artist,
-                track: viewModel.track,
-              ),
-              const SizedBox(width: 20),
-              _ControlButton(
-                isPlaying: viewModel.isPlaying,
-                play: viewModel.play,
-                pause: viewModel.pause,
-              ),
-            ],
+          const SizedBox(height: 10),
+          _Title(
+            flex: 1,
+            artist: viewModel.artist,
+            track: viewModel.track,
           ),
-          const ExpandedBox(flex: 1, minHeight: 10),
-          Slider(
-            value: viewModel.volume,
-            min: 0,
-            max: 100,
-            divisions: 100,
-            label: viewModel.volume.round().toString(),
-            onChanged: viewModel.setVolume,
+          const SizedBox(height: 10),
+          Expanded(
+            flex: 2,
+            child: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  RoundButton(
+                    icon: Icons.now_widgets_outlined,
+                    iconSize: 32,
+                    size: const Size.square(60),
+                    onTap: () {},
+                  ),
+                  _ControlButton(
+                    isPlaying: viewModel.isPlaying,
+                    play: viewModel.play,
+                    pause: viewModel.pause,
+                  ),
+                  RoundButton(
+                    icon: Icons.skip_next,
+                    iconSize: 32,
+                    size: const Size.square(60),
+                    onTap: () {},
+                  ),
+                ],
+              ),
+            ),
           ),
-          const ExpandedBox(flex: 1, minHeight: 10),
+          const SizedBox(height: 10),
+          Expanded(
+            flex: 1,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 10.0),
+              child: Slider(
+                value: viewModel.volume,
+                min: 0,
+                max: 100,
+                divisions: 100,
+                label: viewModel.volume.round().toString(),
+                onChanged: viewModel.setVolume,
+              ),
+            ),
+          ),
           const SizedBox(height: 10),
         ],
       ),
@@ -119,62 +146,56 @@ class _Title extends StatelessWidget {
   const _Title({
     required this.artist,
     required this.track,
+    required this.flex,
   });
 
   final String artist;
   final String track;
+  final int flex;
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: FadedBox(
-        height: 65,
-        alignment: AlignmentDirectional.centerEnd,
-        gradientWidth: 20,
-        colors: [
-          AppTheme.backgroundColor.withOpacity(0),
-          AppTheme.backgroundColor,
+      flex: flex,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          TextScroll(
+            artist,
+            numberOfReps: Config.textScrolling ? null : 0,
+            intervalSpaces: 7,
+            velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
+            delayBefore: const Duration(seconds: 1),
+            pauseBetween: const Duration(seconds: 2),
+            style: TextStyle(
+              fontSize: 24,
+              color: AppTheme.artistFontColor,
+              fontWeight: FontWeight.lerp(
+                FontWeight.w700,
+                FontWeight.w800,
+                AppTheme.fontWeight,
+              ),
+            ),
+          ),
+          TextScroll(
+            track,
+            numberOfReps: Config.textScrolling ? null : 0,
+            intervalSpaces: 10,
+            velocity: const Velocity(pixelsPerSecond: Offset(40, 0)),
+            delayBefore: const Duration(seconds: 1),
+            pauseBetween: const Duration(seconds: 2),
+            style: TextStyle(
+              fontSize: 16,
+              color: AppTheme.trackFontColor,
+              fontWeight: FontWeight.lerp(
+                FontWeight.w700,
+                FontWeight.w800,
+                AppTheme.fontWeight,
+              ),
+            ),
+          ),
         ],
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextScroll(
-              artist,
-              numberOfReps: Config.textScrolling ? null : 0,
-              intervalSpaces: 7,
-              velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
-              delayBefore: const Duration(seconds: 1),
-              pauseBetween: const Duration(seconds: 2),
-              style: TextStyle(
-                fontSize: 24,
-                color: AppTheme.artistFontColor,
-                fontWeight: FontWeight.lerp(
-                  FontWeight.w700,
-                  FontWeight.w800,
-                  AppTheme.fontWeight,
-                ),
-              ),
-            ),
-            TextScroll(
-              track,
-              numberOfReps: Config.textScrolling ? null : 0,
-              intervalSpaces: 10,
-              velocity: const Velocity(pixelsPerSecond: Offset(40, 0)),
-              delayBefore: const Duration(seconds: 1),
-              pauseBetween: const Duration(seconds: 2),
-              style: TextStyle(
-                fontSize: 16,
-                color: AppTheme.trackFontColor,
-                fontWeight: FontWeight.lerp(
-                  FontWeight.w700,
-                  FontWeight.w800,
-                  AppTheme.fontWeight,
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -193,21 +214,21 @@ class _ControlButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipOval(
-      child: Material(
-        color: AppTheme.controlButtonColor,
-        child: InkWell(
-          splashColor: AppTheme.controlButtonSplashColor,
-          child: SizedBox(
-            width: 70,
-            height: 70,
-            child: Icon(
-              isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-              size: 38,
-              color: AppTheme.controlButtonIconColor,
-            ),
-          ),
-          onTap: () => isPlaying ? pause() : play(),
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: AppTheme.controlButtonColor,
+          width: 4.0,
+        ),
+        shape: BoxShape.circle,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(3.0),
+        child: RoundButton(
+          icon: isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+          iconSize: 42,
+          size: const Size.square(80),
+          onTap: isPlaying ? pause : play,
         ),
       ),
     );
