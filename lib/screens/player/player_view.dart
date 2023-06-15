@@ -4,6 +4,8 @@
  *  Created by Ilya Chirkunov <xc@yar.net> on 14.11.2020.
  */
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:single_radio/widgets/round_button.dart';
@@ -41,17 +43,9 @@ class _PlayerViewState extends State<PlayerView> {
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 500),
               child: _Cover(
-                key: viewModel.artwork?.key,
                 size: MediaQuery.of(context).size.width - padding * 2,
-                image: viewModel.trackDetails?.artUrl != null
-                    ? Image.network(
-                        viewModel.trackDetails!.artUrl,
-                        // frameBuilder: (context, child, __, ___) => child,
-                        // loadingBuilder: (context, _, __) => Image.asset(
-                        //   'assets/images/cover.jpg',
-                        //   fit: BoxFit.cover,
-                        // ),
-                      )
+                image: viewModel.artwork != null
+                    ? Image.memory(viewModel.artwork!)
                     : Image.asset(
                         'assets/images/cover.jpg',
                         fit: BoxFit.cover,
@@ -82,6 +76,7 @@ class _PlayerViewState extends State<PlayerView> {
                     isPlaying: viewModel.isPlaying,
                     play: viewModel.play,
                     pause: viewModel.pause,
+                    progress: viewModel.progress,
                   ),
                   RoundButton(
                     icon: Icons.skip_next,
@@ -117,7 +112,6 @@ class _PlayerViewState extends State<PlayerView> {
 
 class _Cover extends StatelessWidget {
   const _Cover({
-    super.key,
     required this.image,
     required this.size,
   });
@@ -214,29 +208,44 @@ class _ControlButton extends StatelessWidget {
     required this.isPlaying,
     required this.play,
     required this.pause,
+    required this.progress,
   });
 
   final bool isPlaying;
   final VoidCallback play;
   final VoidCallback pause;
+  final double progress;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(
-          color: AppTheme.controlButtonColor,
-          width: 4.0,
+        gradient: SweepGradient(
+          colors: const [
+            AppTheme.accentColor,
+            AppTheme.headerColor,
+          ],
+          stops: [progress, progress],
+          transform: const GradientRotation((-90) * pi / 180),
         ),
         shape: BoxShape.circle,
       ),
       child: Padding(
-        padding: const EdgeInsets.all(3.0),
-        child: RoundButton(
-          icon: isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-          iconSize: 42,
-          size: const Size.square(80),
-          onTap: isPlaying ? pause : play,
+        padding: const EdgeInsets.all(4.0),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: AppTheme.backgroundColor,
+            shape: BoxShape.circle,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(3.0),
+            child: RoundButton(
+              icon: isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+              iconSize: 42,
+              size: const Size.square(90),
+              onTap: isPlaying ? pause : play,
+            ),
+          ),
         ),
       ),
     );
