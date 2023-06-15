@@ -22,11 +22,12 @@ dependencies:
   flutter_svg: 1.1.6
   url_launcher: 6.1.8
   text_scroll: 0.1.2
-  sleek_circular_slider : 2.0.1
+  sleek_circular_slider: 2.0.1
   radio_player: 1.2.1
   volume_regulator: 2.1.0
   back_button_behavior: 0.0.1
   dart_common_utils: 1.0.0
+  audioplayers: ^4.1.0
 
 dev_dependencies:
   flutter_lints: 2.0.1
@@ -56,7 +57,7 @@ flutter_native_splash:
 
 flutter:
   uses-material-design: true
-  assets: 
+  assets:
     - assets/text/
     - assets/images/
     - assets/icons/

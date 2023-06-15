@@ -33,17 +33,14 @@ class Screen extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(title: Text(title)),
         drawer: home ? Sidebar() : null,
-        body: BottomBanner(
-          enabled: home,
-          child: ExpandedScrollView(
-            hideOverscrollIndicator: hideOverscrollIndicator,
-            child: Padding(
-              padding: padding ??
-                  EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width * 0.08,
-                  ),
-              child: child,
-            ),
+        body: ExpandedScrollView(
+          hideOverscrollIndicator: hideOverscrollIndicator,
+          child: Padding(
+            padding: padding ??
+                EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width * 0.08,
+                ),
+            child: child,
           ),
         ),
       ),

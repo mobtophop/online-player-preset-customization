@@ -40,11 +40,14 @@ class Config {
   static const admobAndroidAdUnit = 'ca-app-pub-3940256099942544/6300978111';
 
   // Parse metadata from third-party sources.
-  static const metadataUrl = '';
-  static const artistTag = 'artist';
-  static const trackTag = 'title';
-  static const coverTag = 'thumb';
-  static const titleTag = '';
+  static const metadataUrl = 'https://fm.evernetica.com/play/';
+
+  //static const artistTag = 'artist';
+  static const urlTag = 'url';
+  static const nameTag = 'name';
   static const titleSeparator = ' - ';
-  static const timerPeriod = 2;
+  static const coverTag = 'image';
+
+//static const titleTag = '';
+//static const timerPeriod = 2;
 }

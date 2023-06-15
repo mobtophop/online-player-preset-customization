@@ -43,11 +43,19 @@ class _PlayerViewState extends State<PlayerView> {
               child: _Cover(
                 key: viewModel.artwork?.key,
                 size: MediaQuery.of(context).size.width - padding * 2,
-                image: viewModel.artwork ??
-                    Image.asset(
-                      'assets/images/cover.jpg',
-                      fit: BoxFit.cover,
-                    ),
+                image: viewModel.trackDetails?.artUrl != null
+                    ? Image.network(
+                        viewModel.trackDetails!.artUrl,
+                        // frameBuilder: (context, child, __, ___) => child,
+                        // loadingBuilder: (context, _, __) => Image.asset(
+                        //   'assets/images/cover.jpg',
+                        //   fit: BoxFit.cover,
+                        // ),
+                      )
+                    : Image.asset(
+                        'assets/images/cover.jpg',
+                        fit: BoxFit.cover,
+                      ),
               ),
             ),
           ),
@@ -55,7 +63,7 @@ class _PlayerViewState extends State<PlayerView> {
           _Title(
             flex: 1,
             artist: viewModel.artist,
-            track: viewModel.track,
+            track: viewModel.trackName,
           ),
           const SizedBox(height: 10),
           Expanded(
@@ -79,7 +87,7 @@ class _PlayerViewState extends State<PlayerView> {
                     icon: Icons.skip_next,
                     iconSize: 32,
                     size: const Size.square(60),
-                    onTap: () {},
+                    onTap: viewModel.skipTrack,
                   ),
                 ],
               ),
