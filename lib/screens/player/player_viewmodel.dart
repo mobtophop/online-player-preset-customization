@@ -4,6 +4,8 @@
  *  Created by Ilya Chirkunov <xc@yar.net> on 14.11.2020.
  */
 
+import 'dart:async';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
@@ -22,6 +24,9 @@ class PlayerViewModel with ChangeNotifier {
   Uint8List? nextTrackArtwork;
   final MetadataService _metadataService = MetadataService();
   double progress = 0.0;
+
+  Stream<PlayerState> get playerStateStream =>
+      _audioPlayer.onPlayerStateChanged;
 
   bool get isPlaying => _audioPlayer.state == PlayerState.playing;
 

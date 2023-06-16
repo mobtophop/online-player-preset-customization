@@ -4,8 +4,10 @@
  *  Created by Ilya Chirkunov <xc@yar.net> on 14.11.2020.
  */
 
+import 'dart:async';
 import 'dart:math';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:single_radio/widgets/round_button.dart';
@@ -28,6 +30,24 @@ class _PlayerViewState extends State<PlayerView> {
   late final viewModel = Provider.of<PlayerViewModel>(context, listen: true);
 
   double get padding => MediaQuery.of(context).size.width * 0.08;
+
+  final _Visualiser _visualiser = _Visualiser(
+    waveWidth: 8.0,
+    numberOfWaves: 16,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => viewModel.playerStateStream.listen(
+        (state) {
+          _visualiser.startStopController.add(state == PlayerState.playing);
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,18 +126,84 @@ class _PlayerViewState extends State<PlayerView> {
           Expanded(
             flex: 1,
             child: Center(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: AppTheme.accentColor,
-                ),
-                clipBehavior: Clip.hardEdge,
-                width: MediaQuery.of(context).size.width / 3,
-                height: 32.0,
-              ),
+              child: _visualiser,
             ),
           ),
           const SizedBox(height: 8.0),
         ],
+      ),
+    );
+  }
+}
+
+class _Visualiser extends StatefulWidget {
+  _Visualiser({
+    this.waveWidth = 8.0,
+    this.numberOfWaves = 10,
+  });
+
+  final double waveWidth;
+  final int numberOfWaves;
+
+  final StreamController<bool> startStopController = StreamController();
+
+  @override
+  State<_Visualiser> createState() => _VisualiserState();
+}
+
+class _VisualiserState extends State<_Visualiser> {
+  double get waveHeight =>
+      !isPlaying ? 0.0 : (Random().nextInt(99) + 1) / 100.0;
+
+  bool isPlaying = false;
+
+  late Timer timer;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.startStopController.stream.listen((play) {
+      isPlaying = play;
+
+      if (isPlaying) {
+        setUpTimer();
+      } else {
+        timer.cancel();
+      }
+    });
+    setUpTimer();
+  }
+
+  void setUpTimer() {
+    timer = Timer.periodic(
+      const Duration(milliseconds: 150),
+      (_) => setState(() {}),
+    );
+    timer.tick;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: List.generate(
+        widget.numberOfWaves,
+        (_) => _buildSingleWave(waveHeight),
+      ),
+    );
+  }
+
+  Widget _buildSingleWave(double fillPercent) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2.0),
+      child: Container(
+        width: widget.waveWidth,
+        height: widget.waveWidth + widget.waveWidth * 3 * fillPercent,
+        decoration: BoxDecoration(
+          color: AppTheme.accentColor,
+          borderRadius: BorderRadius.circular(widget.waveWidth / 2),
+        ),
       ),
     );
   }
