@@ -32,13 +32,10 @@ class PlayerViewModel with ChangeNotifier {
       ? trackDetails!.artist
       : Config.title;
 
-  Future<double?> getProgress() async {
+  Future<double?> getProgress(Duration position) async {
     Duration? duration = await _audioPlayer.getDuration();
     if (duration != null) {
-      Duration? position = await _audioPlayer.getCurrentPosition();
-      if (position != null) {
-        return position.inMicroseconds / duration.inMicroseconds;
-      }
+      return position.inMilliseconds / duration.inMilliseconds;
     }
 
     return null;
@@ -56,8 +53,8 @@ class PlayerViewModel with ChangeNotifier {
       },
     );
 
-    _audioPlayer.onPositionChanged.listen((_) async {
-      progress = await getProgress() ?? 0.0;
+    _audioPlayer.onPositionChanged.listen((position) async {
+      progress = await getProgress(position) ?? 0.0;
       notifyListeners();
     });
 
