@@ -7,8 +7,6 @@
 import 'package:flutter/material.dart';
 import 'package:back_button_behavior/back_button_behavior.dart';
 import 'package:single_radio/widgets/sidebar.dart';
-import 'package:single_radio/widgets/expanded_scroll_view.dart';
-import 'package:single_radio/widgets/bottom_banner.dart';
 
 class Screen extends StatelessWidget {
   const Screen({
@@ -33,15 +31,12 @@ class Screen extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(title: Text(title)),
         drawer: home ? Sidebar() : null,
-        body: ExpandedScrollView(
-          hideOverscrollIndicator: hideOverscrollIndicator,
-          child: Padding(
-            padding: padding ??
-                EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * 0.08,
-                ),
-            child: child,
-          ),
+        body: Padding(
+          padding: padding ??
+              EdgeInsets.symmetric(
+                horizontal: MediaQuery.of(context).size.width * 0.08,
+              ),
+          child: child,
         ),
       ),
     );
