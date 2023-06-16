@@ -28,6 +28,7 @@ dependencies:
   back_button_behavior: 0.0.1
   dart_common_utils: 1.0.0
   audioplayers: ^4.1.0
+  audio_service: ^0.18.10
 
 dev_dependencies:
   flutter_lints: 2.0.1

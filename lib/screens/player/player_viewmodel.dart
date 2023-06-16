@@ -7,6 +7,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
+import 'package:single_radio/main.dart';
 import 'package:volume_regulator/volume_regulator.dart';
 import 'package:single_radio/config.dart';
 import 'package:single_radio/language.dart';
@@ -67,6 +68,35 @@ class PlayerViewModel with ChangeNotifier {
       volume = value.toDouble();
       notifyListeners();
     });
+
+    audioHandlerEventController.stream.listen(
+      (event) {
+        switch (event) {
+          case ("play"):
+            play();
+            break;
+          case ("pause"):
+            pause();
+            break;
+          case ("skip"):
+            skipTrack();
+            break;
+        }
+      },
+    );
+
+    _audioPlayer.onPlayerStateChanged.listen(
+      (playerState) {
+        audioEventController.add(
+          AudioPlayerEvent(
+            playerState: playerState,
+            title: trackName,
+            artist: artist,
+            artUri: trackDetails!.artUrl,
+          ),
+        );
+      },
+    );
   }
 
   void play() async {
