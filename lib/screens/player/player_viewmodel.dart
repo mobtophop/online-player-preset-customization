@@ -59,6 +59,8 @@ class PlayerViewModel with ChangeNotifier {
       notifyListeners();
     });
 
+    _audioPlayer.onPlayerComplete.listen((_) => skipTrack());
+
     VolumeRegulator.getVolume().then((value) {
       volume = value.toDouble();
       notifyListeners();
