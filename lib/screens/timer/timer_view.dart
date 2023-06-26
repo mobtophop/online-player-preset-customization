@@ -11,11 +11,11 @@ import 'package:single_radio/theme.dart';
 import 'package:single_radio/language.dart';
 import 'package:single_radio/extensions/duration_extension.dart';
 import 'package:single_radio/widgets/screen.dart';
-import 'package:single_radio/widgets/expanded_box.dart';
 import 'package:single_radio/screens/timer/timer_viewmodel.dart';
 
 class TimerView extends StatefulWidget {
   const TimerView({super.key});
+
   static const routeName = '/timer';
 
   @override
@@ -30,31 +30,39 @@ class _TimerViewState extends State<TimerView> {
     return Screen(
       title: Language.sleepTimer,
       hideOverscrollIndicator: true,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const ExpandedBox(minHeight: 30),
-            const _CircularSlider(),
-            const ExpandedBox(minHeight: 30),
-            viewModel.timer?.isActive ?? false
-                ? _Button(
-                    title: Language.stopTimer,
-                    color: AppTheme.timerStopButtonBackgroundColor,
-                    textColor: AppTheme.timerStopButtonFontColor,
-                    onTap: viewModel.stopTimer,
-                  )
-                : _Button(
-                    title: Language.startTimer,
-                    color: AppTheme.timerButtonBackgroundColor,
-                    textColor: AppTheme.timerButtonFontColor,
-                    onTap: viewModel.startTimer,
-                  ),
-            const ExpandedBox(minHeight: 30),
-          ],
-        ),
-      ),
+      child: MediaQuery.of(context).orientation == Orientation.portrait
+          ? Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: _screenChildren(),
+            )
+          : Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: _screenChildren(),
+            ),
     );
+  }
+
+  List<Widget> _screenChildren() {
+    return [
+      const Center(child: _CircularSlider()),
+      viewModel.timer?.isActive ?? false
+          ? _Button(
+              title: Language.stopTimer,
+              color: AppTheme.timerStopButtonBackgroundColor,
+              textColor: AppTheme.timerStopButtonFontColor,
+              onTap: viewModel.stopTimer,
+            )
+          : _Button(
+              title: Language.startTimer,
+              color: AppTheme.timerButtonBackgroundColor,
+              textColor: AppTheme.timerButtonFontColor,
+              onTap: viewModel.startTimer,
+            ),
+    ];
   }
 }
 
@@ -155,23 +163,25 @@ class _Button extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ButtonStyle(
-        foregroundColor: MaterialStateProperty.all<Color>(textColor),
-        backgroundColor: MaterialStateProperty.all<Color>(color),
-        minimumSize: MaterialStateProperty.all<Size>(const Size(180, 40)),
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+    return Center(
+      child: ElevatedButton(
+        style: ButtonStyle(
+          foregroundColor: MaterialStateProperty.all<Color>(textColor),
+          backgroundColor: MaterialStateProperty.all<Color>(color),
+          minimumSize: MaterialStateProperty.all<Size>(const Size(180, 40)),
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+          ),
         ),
-      ),
-      onPressed: onTap,
-      child: Text(
-        title,
-        style: TextStyle(
-          fontWeight: FontWeight.lerp(
-            FontWeight.w500,
-            FontWeight.w700,
-            AppTheme.fontWeight,
+        onPressed: onTap,
+        child: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.lerp(
+              FontWeight.w500,
+              FontWeight.w700,
+              AppTheme.fontWeight,
+            ),
           ),
         ),
       ),

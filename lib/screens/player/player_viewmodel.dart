@@ -28,6 +28,8 @@ class PlayerViewModel with ChangeNotifier {
   Stream<PlayerState> get playerStateStream =>
       _audioPlayer.onPlayerStateChanged;
 
+  PlayerState get playerState => _audioPlayer.state;
+
   bool get isPlaying => _audioPlayer.state == PlayerState.playing;
 
   String get trackName => trackDetails != null && trackDetails!.name.isNotEmpty

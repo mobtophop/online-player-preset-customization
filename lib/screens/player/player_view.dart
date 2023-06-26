@@ -31,10 +31,13 @@ class _PlayerViewState extends State<PlayerView> {
 
   double get padding => MediaQuery.of(context).size.width * 0.08;
 
-  final _Visualiser _visualiser = _Visualiser(
+  late final _Visualiser _visualiser = _Visualiser(
+    startStopController: visualizerController,
     waveWidth: 8.0,
     numberOfWaves: 16,
   );
+
+  StreamController<bool> visualizerController = StreamController.broadcast();
 
   @override
   void initState() {
@@ -43,7 +46,7 @@ class _PlayerViewState extends State<PlayerView> {
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => viewModel.playerStateStream.listen(
         (state) {
-          _visualiser.startStopController.add(state == PlayerState.playing);
+          visualizerController.add(state == PlayerState.playing);
         },
       ),
     );
@@ -51,6 +54,13 @@ class _PlayerViewState extends State<PlayerView> {
 
   @override
   Widget build(BuildContext context) {
+    visualizerController.add(viewModel.playerState == PlayerState.playing);
+    return MediaQuery.of(context).orientation == Orientation.portrait
+        ? _buildPortraitScreen()
+        : _buildLandscapeScreen();
+  }
+
+  Widget _buildPortraitScreen() {
     return Screen(
       title: Config.title,
       home: true,
@@ -134,18 +144,127 @@ class _PlayerViewState extends State<PlayerView> {
       ),
     );
   }
+
+  Widget _buildLandscapeScreen() {
+    return Screen(
+      title: Config.title,
+      home: true,
+      hideOverscrollIndicator: true,
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 16.0),
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.contain,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 500),
+                      child: _Cover(
+                        size: MediaQuery.of(context).size.height - padding * 2,
+                        image: viewModel.artwork != null
+                            ? Image.memory(viewModel.artwork!)
+                            : Image.asset(
+                                'assets/images/cover.jpg',
+                                fit: BoxFit.cover,
+                              ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16.0),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 16.0),
+                _Title(
+                  flex: 1,
+                  artist: viewModel.artist,
+                  track: viewModel.trackName,
+                ),
+                const SizedBox(height: 8.0),
+                Expanded(
+                  flex: 2,
+                  child: Center(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        RoundButton(
+                          icon: Icons.now_widgets_outlined,
+                          iconSize: 32,
+                          size: const Size.square(60),
+                          onTap: () {},
+                        ),
+                        _ControlButton(
+                          isPlaying: viewModel.isPlaying,
+                          play: viewModel.play,
+                          pause: viewModel.pause,
+                          progress: viewModel.progress,
+                        ),
+                        RoundButton(
+                          icon: Icons.skip_next,
+                          iconSize: 32,
+                          size: const Size.square(60),
+                          onTap: viewModel.skipTrack,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Slider(
+                    value: viewModel.volume,
+                    min: 0,
+                    max: 100,
+                    divisions: 100,
+                    label: viewModel.volume.round().toString(),
+                    onChanged: viewModel.setVolume,
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Center(
+                    child: _visualiser,
+                  ),
+                ),
+                const SizedBox(height: 8.0),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _Visualiser extends StatefulWidget {
   _Visualiser({
+    required this.startStopController,
     this.waveWidth = 8.0,
     this.numberOfWaves = 10,
   });
 
   final double waveWidth;
   final int numberOfWaves;
+  final StreamController<bool> startStopController;
 
-  final StreamController<bool> startStopController = StreamController();
+  //TODO: fix memory leak on orientation change
+  late final Timer timer = Timer.periodic(
+    const Duration(milliseconds: 150),
+    (_) {
+      timerTick.add(null);
+    },
+  );
+
+  final StreamController<void> timerTick = StreamController.broadcast();
 
   @override
   State<_Visualiser> createState() => _VisualiserState();
@@ -157,29 +276,29 @@ class _VisualiserState extends State<_Visualiser> {
 
   bool isPlaying = false;
 
-  late Timer timer;
-
   @override
   void initState() {
     super.initState();
-    widget.startStopController.stream.listen((play) {
-      isPlaying = play;
 
-      if (isPlaying) {
-        setUpTimer();
-      } else {
-        timer.cancel();
-      }
-    });
-    setUpTimer();
-  }
-
-  void setUpTimer() {
-    timer = Timer.periodic(
-      const Duration(milliseconds: 150),
-      (_) => setState(() {}),
+    widget.startStopController.stream.listen(
+      (play) {
+        if (!mounted) return;
+        isPlaying = play;
+        setState(() {});
+      },
     );
-    timer.tick;
+
+    //TODO: fix memory leak on orientation change
+    widget.timerTick.stream.listen(
+      (_) {
+        if (!mounted) return;
+        if (isPlaying) setState(() {});
+      },
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.timer.tick;
+    });
   }
 
   @override
